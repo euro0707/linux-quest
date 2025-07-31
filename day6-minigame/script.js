@@ -703,7 +703,38 @@ jack:user:31:engineering`
         this.updateSageMessage('圧倒的だ！君は今日、データの流れを自在に操る術を習得した。パイプとリダイレクトは、Linux の最も美しく強力な機能の一つだ！');
         this.updateHint('🏆 Day6完了！お疲れ様でした！明日は最終日 - 総合的なシステム管理ツールを作成します。');
         
+        // メインハブに戻るボタンを表示
+        this.showReturnButton();
+        
+        // 進捗を親ウィンドウに通知
+        if (window.parent && window.parent.LinuxQuest) {
+            window.parent.LinuxQuest.markDayCompleted(6);
+        }
+        
         this.updateFlowVisualization(['習得完了', '技術統合', '実践準備', '最終試練へ']);
+    }
+    
+    showReturnButton() {
+        const returnButton = document.createElement('button');
+        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.style.cssText = `
+            background: linear-gradient(45deg, #ff6b35, #ffd700);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            animation: pulse 2s infinite;
+        `;
+        returnButton.onclick = () => {
+            window.location.href = '../index.html?completed=6';
+        };
+        
+        document.body.appendChild(returnButton);
     }
     
     updateSageMessage(message) {

@@ -586,6 +586,14 @@ class Day7LinuxQuest {
         
         this.updateSageMessage('完璧だ！君は見事にLinux Questを完走した。今や君は企業が求める貴重な人材だ。DevOps、SRM、システム管理者...多くの道が君の前に開かれている！');
         this.updateHint('🎊 Linux Quest修了おめでとうございます！generate-certificate で修了証明書を作成しましょう。');
+        
+        // メインハブに戻るボタンを表示
+        this.showReturnButton();
+        
+        // 進捗を親ウィンドウに通知
+        if (window.parent && window.parent.LinuxQuest) {
+            window.parent.LinuxQuest.markDayCompleted(7);
+        }
     }
     
     handleGenerateCertificate() {
@@ -766,6 +774,29 @@ class Day7LinuxQuest {
             `;
             document.head.appendChild(style);
         }
+    }
+    
+    showReturnButton() {
+        const returnButton = document.createElement('button');
+        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.style.cssText = `
+            background: linear-gradient(45deg, #ff6b35, #ffd700);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            animation: pulse 2s infinite;
+        `;
+        returnButton.onclick = () => {
+            window.location.href = '../index.html?completed=7';
+        };
+        
+        document.body.appendChild(returnButton);
     }
     
     updateSageMessage(message) {

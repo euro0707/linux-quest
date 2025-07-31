@@ -568,6 +568,37 @@ class Day4LinuxQuest {
         
         this.updateSageMessage('見事だ！君は今日、システムセキュリティの根幹である権限システムを完全に理解した。これは実際の業務で毎日使う重要な知識だ！');
         this.updateHint('🏆 Day4完了！お疲れ様でした！明日はシェルスクリプトの作成について学びます。');
+        
+        // メインハブに戻るボタンを表示
+        this.showReturnButton();
+        
+        // 進捗を親ウィンドウに通知
+        if (window.parent && window.parent.LinuxQuest) {
+            window.parent.LinuxQuest.markDayCompleted(4);
+        }
+    }
+    
+    showReturnButton() {
+        const returnButton = document.createElement('button');
+        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.style.cssText = `
+            background: linear-gradient(45deg, #ff6b35, #ffd700);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            animation: pulse 2s infinite;
+        `;
+        returnButton.onclick = () => {
+            window.location.href = '../index.html?completed=4';
+        };
+        
+        document.body.appendChild(returnButton);
     }
     
     updateSageMessage(message) {

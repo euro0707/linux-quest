@@ -499,6 +499,37 @@ class LinuxQuestDay2 {
         
         this.updateSageMessage('見事だ！君は今日、デジタル世界の住人として大きく成長した。明日は書物を読む技術を学ぼう！');
         this.updateHint('🏆 Day2完了！お疲れ様でした！明日はファイル閲覧・編集技術を学びます。');
+        
+        // メインハブに戻るボタンを表示
+        this.showReturnButton();
+        
+        // 進捗を親ウィンドウに通知
+        if (window.parent && window.parent.LinuxQuest) {
+            window.parent.LinuxQuest.markDayCompleted(2);
+        }
+    }
+    
+    showReturnButton() {
+        const returnButton = document.createElement('button');
+        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.style.cssText = `
+            background: linear-gradient(45deg, #ff6b35, #ffd700);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            animation: pulse 2s infinite;
+        `;
+        returnButton.onclick = () => {
+            window.location.href = '../index.html?completed=2';
+        };
+        
+        document.body.appendChild(returnButton);
     }
     
     updateSageMessage(message) {
