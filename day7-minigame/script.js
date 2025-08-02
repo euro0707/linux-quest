@@ -587,7 +587,7 @@ class Day7LinuxQuest {
         this.updateSageMessage('完璧だ！君は見事にLinux Questを完走した。今や君は企業が求める貴重な人材だ。DevOps、SRM、システム管理者...多くの道が君の前に開かれている！');
         this.updateHint('🎊 Linux Quest修了おめでとうございます！generate-certificate で修了証明書を作成しましょう。');
         
-        // メインハブに戻るボタンを表示
+        // メイン画面に戻るボタンを表示
         this.showReturnButton();
         
         // 進捗を親ウィンドウに通知
@@ -778,7 +778,7 @@ class Day7LinuxQuest {
     
     showReturnButton() {
         const returnButton = document.createElement('button');
-        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.textContent = '🏠 メイン画面に戻る';
         returnButton.style.cssText = `
             background: linear-gradient(45deg, #ff6b35, #ffd700);
             border: none;
@@ -824,3 +824,41 @@ class Day7LinuxQuest {
 document.addEventListener('DOMContentLoaded', () => {
     new Day7LinuxQuest();
 });
+
+// 意図的な退出フラグ
+let isIntentionalExit = false;
+
+// ページ離脱前の確認（意図しない離脱のみ）
+window.addEventListener('beforeunload', (event) => {
+    // 意図的な退出の場合は警告しない
+    if (isIntentionalExit) {
+        return;
+    }
+    
+    // 進行中の場合のみ確認
+    const game = document.querySelector('.container');
+    if (game && !localStorage.getItem('day7-completed')) {
+        event.preventDefault();
+        event.returnValue = '本当にページを離れますか？進捗が失われる可能性があります。';
+        return event.returnValue;
+    }
+});
+
+// 固定ナビゲーションボタンの関数
+function confirmReturnHome() {
+    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
+    if (confirmed) {
+        // 意図的な退出フラグを設定
+        isIntentionalExit = true;
+        
+        // 進捗を保存
+        const currentProgress = {
+            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('day7-progress', JSON.stringify(currentProgress));
+        
+        // メイン画面に戻る
+        window.location.href = '../index.html';
+    }
+}

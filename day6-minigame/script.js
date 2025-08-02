@@ -703,7 +703,7 @@ jack:user:31:engineering`
         this.updateSageMessage('圧倒的だ！君は今日、データの流れを自在に操る術を習得した。パイプとリダイレクトは、Linux の最も美しく強力な機能の一つだ！');
         this.updateHint('🏆 Day6完了！お疲れ様でした！明日は最終日 - 総合的なシステム管理ツールを作成します。');
         
-        // メインハブに戻るボタンを表示
+        // メイン画面に戻るボタンを表示
         this.showReturnButton();
         
         // 進捗を親ウィンドウに通知
@@ -716,7 +716,7 @@ jack:user:31:engineering`
     
     showReturnButton() {
         const returnButton = document.createElement('button');
-        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.textContent = '🏠 メイン画面に戻る';
         returnButton.style.cssText = `
             background: linear-gradient(45deg, #ff6b35, #ffd700);
             border: none;
@@ -762,3 +762,41 @@ jack:user:31:engineering`
 document.addEventListener('DOMContentLoaded', () => {
     new Day6LinuxQuest();
 });
+
+// 意図的な退出フラグ
+let isIntentionalExit = false;
+
+// ページ離脱前の確認（意図しない離脱のみ）
+window.addEventListener('beforeunload', (event) => {
+    // 意図的な退出の場合は警告しない
+    if (isIntentionalExit) {
+        return;
+    }
+    
+    // 進行中の場合のみ確認
+    const game = document.querySelector('.container');
+    if (game && !localStorage.getItem('day6-completed')) {
+        event.preventDefault();
+        event.returnValue = '本当にページを離れますか？進捗が失われる可能性があります。';
+        return event.returnValue;
+    }
+});
+
+// 固定ナビゲーションボタンの関数
+function confirmReturnHome() {
+    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
+    if (confirmed) {
+        // 意図的な退出フラグを設定
+        isIntentionalExit = true;
+        
+        // 進捗を保存
+        const currentProgress = {
+            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('day6-progress', JSON.stringify(currentProgress));
+        
+        // メイン画面に戻る
+        window.location.href = '../index.html';
+    }
+}

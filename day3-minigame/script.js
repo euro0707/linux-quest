@@ -189,7 +189,7 @@ backup_enabled=true`
             if (fileName === 'long_story.txt' && !this.completedTasks.has('task-cat-n')) {
                 this.completeTask('task-cat-n');
                 this.updateSageMessage('素晴らしい！行番号付きで表示できました。これで特定の行を参照しやすくなります。');
-                this.updateHint('次はlessコマンドでページごとに閲覧してみましょう: less long_story.txt');
+                this.updateHint('次はnano adventure_log.txtでファイルを編集してみましょう。');
             }
         } else {
             lines.forEach(line => {
@@ -199,7 +199,7 @@ backup_enabled=true`
             if (fileName === 'long_story.txt' && !this.completedTasks.has('task-cat-full')) {
                 this.completeTask('task-cat-full');
                 this.updateSageMessage('よくできました！catでファイル全体を表示できました。長いファイルの場合はlessの方が便利です。');
-                this.updateHint('今度はcat -n long_story.txtで行番号付きで表示してみましょう。');
+                this.updateHint('次はlessコマンドでページごとに閲覧してみましょう: less long_story.txt');
             }
         }
     }
@@ -235,6 +235,7 @@ backup_enabled=true`
         if (!this.completedTasks.has('task-less')) {
             this.completeTask('task-less');
             this.updateSageMessage('素晴らしい！lessでページごとに閲覧できるようになりました。長いファイルを読むのに最適です。');
+            this.updateHint('📋 lessを終了するには「q」を入力してEnterを押してください。終了後にheadコマンドを試しましょう。');
         }
     }
     
@@ -348,7 +349,12 @@ backup_enabled=true`
         this.lessCurrentLine = 0;
         this.lessSearchTerm = '';
         this.commandInput.placeholder = 'コマンドを入力してください';
+        this.commandInput.value = ''; // 入力フィールドをクリア
         this.addTerminalLine('', '--- less を終了しました ---', 'output-text');
+        this.addTerminalLine('', '🎯 次のクエスト: head long_story.txt を入力してください', 'hint-text');
+        this.updateHint('次はheadコマンドでファイルの最初の部分を表示してみましょう: head long_story.txt');
+        this.commandInput.focus(); // フォーカスを確実に戻す
+        console.log('Less exited successfully'); // デバッグ用ログ
     }
     
     handleHead(args) {
@@ -425,7 +431,7 @@ backup_enabled=true`
         if (!this.completedTasks.has('task-tail')) {
             this.completeTask('task-tail');
             this.updateSageMessage('見事です！tailでファイルの最後の部分を表示できました。ログファイルの監視などに重宝します。');
-            this.updateHint('次はnano adventure_log.txtでファイルを編集してみましょう。');
+            this.updateHint('今度はcat -n long_story.txtで行番号付きで表示してみましょう。');
         }
     }
     
@@ -702,7 +708,7 @@ backup_enabled=true`
         this.updateSageMessage('おめでとう！君は今日、ファイルを読み解く様々な技術を習得した。これらは実際のシステム管理で毎日使われる重要な技術だ！');
         this.updateHint('🏆 Day3完了！お疲れ様でした！明日はファイル権限とchmodについて学びます。');
         
-        // メインハブに戻るボタンを表示
+        // メイン画面に戻るボタンを表示
         this.showReturnButton();
         
         // 進捗を親ウィンドウに通知
@@ -713,7 +719,7 @@ backup_enabled=true`
     
     showReturnButton() {
         const returnButton = document.createElement('button');
-        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.textContent = '🏠 メイン画面に戻る';
         returnButton.style.cssText = `
             background: linear-gradient(45deg, #ff6b35, #ffd700);
             border: none;
@@ -763,3 +769,41 @@ backup_enabled=true`
 document.addEventListener('DOMContentLoaded', () => {
     new Day3LinuxQuest();
 });
+
+// 意図的な退出フラグ
+let isIntentionalExit = false;
+
+// ページ離脱前の確認（意図しない離脱のみ）
+window.addEventListener('beforeunload', (event) => {
+    // 意図的な退出の場合は警告しない
+    if (isIntentionalExit) {
+        return;
+    }
+    
+    // 進行中の場合のみ確認
+    const game = document.querySelector('.container');
+    if (game && !localStorage.getItem('day3-completed')) {
+        event.preventDefault();
+        event.returnValue = '本当にページを離れますか？進捗が失われる可能性があります。';
+        return event.returnValue;
+    }
+});
+
+// 固定ナビゲーションボタンの関数
+function confirmReturnHome() {
+    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
+    if (confirmed) {
+        // 意図的な退出フラグを設定
+        isIntentionalExit = true;
+        
+        // 進捗を保存
+        const currentProgress = {
+            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('day3-progress', JSON.stringify(currentProgress));
+        
+        // メイン画面に戻る
+        window.location.href = '../index.html';
+    }
+}

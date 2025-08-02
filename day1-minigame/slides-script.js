@@ -117,7 +117,7 @@ document.addEventListener('keydown', function(event) {
             break;
         case 'Escape':
             // Go back to main hub
-            const goBack = confirm('事前学習を中断してメインハブに戻りますか？');
+            const goBack = confirm('事前学習を中断してメイン画面に戻りますか？');
             if (goBack) {
                 window.location.href = '../index.html';
             }

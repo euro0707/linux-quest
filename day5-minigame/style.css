@@ -446,6 +446,43 @@ body {
     50% { transform: translateY(-10px); }
 }
 
+/* Fixed Navigation Button */
+.fixed-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.nav-button {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    min-width: 180px;
+    white-space: nowrap;
+}
+
+.nav-button:hover {
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+}
+
+.fixed-nav:hover .nav-button {
+    transform: translateX(-50%) translateY(-3px);
+}
+
+.home-btn {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+}
+
 @media (max-width: 768px) {
     .game-area {
         grid-template-columns: 1fr;
@@ -467,5 +504,15 @@ body {
     
     .ref-tabs {
         flex-wrap: wrap;
+    }
+    
+    .fixed-nav {
+        bottom: 15px;
+    }
+    
+    .nav-button {
+        font-size: 0.9em;
+        padding: 12px 18px;
+        min-width: 160px;
     }
 }

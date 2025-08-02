@@ -8,6 +8,7 @@ class LinuxQuestGame {
         this.currentPath = '/home/quest';
         this.completedTasks = new Set();
         this.commandHistory = [];
+        this.awaitingExitConfirmation = false;
         
         // 仮想ファイルシステム
         this.fileSystem = {
@@ -32,7 +33,27 @@ class LinuxQuestGame {
         });
         
         this.commandInput.focus();
+        this.checkSlidesCompletion();
         this.showWelcomeMessage();
+    }
+    
+    checkSlidesCompletion() {
+        const slidesCompleted = localStorage.getItem('day1-slides-completed');
+        if (slidesCompleted === 'true') {
+            this.addTerminalLine('', '✅ 事前学習完了済み！実践練習を開始しましょう！', 'success-text');
+        } else {
+            this.addTerminalLine('', '💡 ヒント: 事前にスライドで学習すると理解が深まります', 'hint-text');
+            const slideLink = document.createElement('a');
+            slideLink.href = 'slides.html';
+            slideLink.textContent = '📚 事前学習スライドを見る';
+            slideLink.style.cssText = 'color: #00ffff; text-decoration: underline; margin-left: 10px;';
+            slideLink.target = '_blank';
+            
+            const linkLine = document.createElement('div');
+            linkLine.className = 'terminal-line';
+            linkLine.appendChild(slideLink);
+            this.terminal.appendChild(linkLine);
+        }
     }
     
     showWelcomeMessage() {
@@ -62,6 +83,12 @@ class LinuxQuestGame {
     }
     
     processCommand(command) {
+        // exit確認待ちの場合
+        if (this.awaitingExitConfirmation) {
+            this.processExitConfirmation(command);
+            return;
+        }
+        
         const args = command.split(' ');
         const cmd = args[0].toLowerCase();
         
@@ -84,6 +111,16 @@ class LinuxQuestGame {
             case 'history':
                 this.handleHistory();
                 break;
+            case 'debug':
+                this.handleDebug();
+                break;
+            case 'skip':
+                this.handleSkip();
+                break;
+            case 'exit':
+            case 'quit':
+                this.handleExit();
+                break;
             default:
                 this.handleUnknownCommand(cmd);
         }
@@ -98,6 +135,10 @@ class LinuxQuestGame {
             this.completeTask('task-echo');
             this.updateSageMessage('素晴らしい！echoコマンドでコンピューターと会話できた！次はpwdを試してみよう。');
             this.updateHint('次は「pwd」と入力して、現在いる場所を確認してみましょう。');
+        } else if (cleanText.toLowerCase().includes('hello') || cleanText.toLowerCase().includes('linux')) {
+            this.addTerminalLine('', '💡 ヒント：「Hello, Linux World!」と入力してみてください', 'hint-text');
+        } else if (cleanText.trim() === '') {
+            this.addTerminalLine('', 'echoコマンドには表示するテキストが必要です', 'hint-text');
         }
     }
     
@@ -140,6 +181,9 @@ class LinuxQuestGame {
         this.addTerminalLine('', '  help - このヘルプを表示', 'output-text');
         this.addTerminalLine('', '  clear - ターミナルをクリア', 'output-text');
         this.addTerminalLine('', '  history - コマンド履歴を表示', 'output-text');
+        this.addTerminalLine('', '  debug - デバッグ情報を表示 (テスト用)', 'output-text');
+        this.addTerminalLine('', '  skip - 全タスクを完了 (テスト用)', 'output-text');
+        this.addTerminalLine('', '  exit / quit - ゲームを終了', 'output-text');
     }
     
     handleHistory() {
@@ -263,7 +307,7 @@ class LinuxQuestGame {
     
     showReturnButton() {
         const returnButton = document.createElement('button');
-        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.textContent = '🏠 メイン画面に戻る';
         returnButton.style.cssText = `
             background: linear-gradient(45deg, #ff6b35, #ffd700);
             border: none;
@@ -299,9 +343,88 @@ class LinuxQuestGame {
             this.hintText.parentElement.style.animation = 'pulse 2s infinite';
         }, 10);
     }
+    
+    handleDebug() {
+        this.addTerminalLine('', '🐛 デバッグ情報:', 'output-text');
+        this.addTerminalLine('', `完了タスク: ${Array.from(this.completedTasks).join(', ')}`, 'output-text');
+        this.addTerminalLine('', `現在パス: ${this.currentPath}`, 'output-text');
+        this.addTerminalLine('', `コマンド履歴: ${this.commandHistory.length}件`, 'output-text');
+        this.addTerminalLine('', `スライド完了: ${localStorage.getItem('day1-slides-completed') || 'false'}`, 'output-text');
+    }
+    
+    handleSkip() {
+        this.addTerminalLine('', '⚡ テスト用: 全タスクを完了します', 'output-text');
+        this.completeTask('task-echo');
+        this.completeTask('task-pwd');  
+        this.completeTask('task-ls');
+        setTimeout(() => {
+            this.checkAllTasksComplete();
+        }, 500);
+    }
+    
+    handleExit() {
+        this.addTerminalLine('', '🚪 ゲームを終了しますか？', 'output-text');
+        this.addTerminalLine('', '「yes」で終了、「no」で続行', 'hint-text');
+        
+        // 次の入力で確認
+        this.awaitingExitConfirmation = true;
+    }
+    
+    processExitConfirmation(input) {
+        this.awaitingExitConfirmation = false;
+        
+        if (input.toLowerCase() === 'yes' || input.toLowerCase() === 'y') {
+            this.addTerminalLine('', '👋 お疲れ様でした！またいつでも挑戦してください！', 'output-text');
+            setTimeout(() => {
+                window.location.href = '../index.html';
+            }, 2000);
+        } else {
+            this.addTerminalLine('', '✨ 冒険を続けましょう！', 'output-text');
+            this.updateHint('元のクエストに戻りました。コマンドを入力してください。');
+        }
+    }
 }
 
 // ゲーム開始
 document.addEventListener('DOMContentLoaded', () => {
     new LinuxQuestGame();
 });
+
+// 意図的な退出フラグ
+let isIntentionalExit = false;
+
+// ページ離脱前の確認（意図しない離脱のみ）
+window.addEventListener('beforeunload', (event) => {
+    // 意図的な退出の場合は警告しない
+    if (isIntentionalExit) {
+        return;
+    }
+    
+    // 進行中の場合のみ確認
+    const game = document.querySelector('.container');
+    if (game && !localStorage.getItem('day1-completed')) {
+        event.preventDefault();
+        event.returnValue = '本当にページを離れますか？進捗が失われる可能性があります。';
+        return event.returnValue;
+    }
+});
+
+// 固定ナビゲーションボタンの関数
+function confirmReturnHome() {
+    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
+    if (confirmed) {
+        // 意図的な退出フラグを設定
+        isIntentionalExit = true;
+        
+        // 進捗を保存
+        const currentProgress = {
+            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('day1-progress', JSON.stringify(currentProgress));
+        
+        // メイン画面に戻る
+        window.location.href = '../index.html';
+    }
+}
+

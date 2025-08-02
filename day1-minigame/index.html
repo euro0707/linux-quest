@@ -8,6 +8,13 @@
 </head>
 <body>
     <div class="container">
+        <!-- 固定ナビゲーションボタン -->
+        <div class="fixed-nav">
+            <button class="nav-button home-btn" onclick="confirmReturnHome()" title="メイン画面に戻る">
+                🏠 メイン画面に戻る
+            </button>
+        </div>
+        
         <header class="quest-header">
             <h1>🗡️ Linux Quest Day1: 新たな旅路の始まり</h1>
             <p class="sage-message">賢者：「勇者よ、黒い画面に最初の魔法の言葉を刻もう」</p>
@@ -68,6 +75,14 @@
             <h3>💡 ヒント</h3>
             <div id="hintText">
                 最初のコマンド「echo "Hello, Linux World!"」を入力してみましょう。
+            </div>
+        </div>
+
+        <div class="help-panel">
+            <h3>🆘 困ったときは</h3>
+            <div class="help-commands">
+                <span class="help-item">「help」でコマンド一覧</span>
+                <span class="help-item">「exit」でゲーム終了</span>
             </div>
         </div>
 

@@ -41,8 +41,18 @@ class LinuxQuestDay2 {
         });
         
         this.commandInput.focus();
+        this.checkSlidesCompletion();
         this.updateFilesystemView();
         this.showWelcomeMessage();
+    }
+    
+    checkSlidesCompletion() {
+        const slidesCompleted = localStorage.getItem('day2-slides-completed');
+        if (slidesCompleted === 'true') {
+            this.addTerminalLine('', '✅ 事前学習完了済み！ディレクトリ操作を実践しましょう！', 'success-text');
+        } else {
+            this.addTerminalLine('', '💡 推奨: 事前学習でディレクトリの概念を理解しておくと効果的です', 'hint-text');
+        }
     }
     
     showWelcomeMessage() {
@@ -115,6 +125,12 @@ class LinuxQuestDay2 {
                 break;
             case 'history':
                 this.handleHistory();
+                break;
+            case 'debug':
+                this.handleDebug();
+                break;
+            case 'skip':
+                this.handleSkip();
                 break;
             default:
                 this.handleUnknownCommand(cmd);
@@ -511,7 +527,7 @@ class LinuxQuestDay2 {
     
     showReturnButton() {
         const returnButton = document.createElement('button');
-        returnButton.textContent = '🏠 メインハブに戻る';
+        returnButton.textContent = '🏠 メイン画面に戻る';
         returnButton.style.cssText = `
             background: linear-gradient(45deg, #ff6b35, #ffd700);
             border: none;
@@ -530,6 +546,30 @@ class LinuxQuestDay2 {
         };
         
         document.body.appendChild(returnButton);
+    }
+    
+    handleDebug() {
+        this.addTerminalLine('', '🐛 デバッグ情報:', 'output-text');
+        this.addTerminalLine('', `完了タスク: ${Array.from(this.completedTasks).join(', ')}`, 'output-text');
+        this.addTerminalLine('', `現在パス: ${this.currentPath}`, 'output-text');
+        this.addTerminalLine('', `コマンド履歴: ${this.commandHistory.length}件`, 'output-text');  
+        this.addTerminalLine('', `スライド完了: ${localStorage.getItem('day2-slides-completed') || 'false'}`, 'output-text');
+        this.addTerminalLine('', `ファイルシステム構造:`, 'output-text');
+        Object.keys(this.fileSystem).forEach(path => {
+            this.addTerminalLine('', `  ${path}: ${Object.keys(this.fileSystem[path]).length}個のアイテム`, 'output-text');
+        });
+    }
+    
+    handleSkip() {
+        this.addTerminalLine('', '⚡ テスト用: Day2の全タスクを完了します', 'output-text');
+        // Day2の主要タスクを完了
+        const tasks = ['task-ls-detail', 'task-mkdir', 'task-cd', 'task-touch', 'task-echo-redirect', 'task-cat'];
+        tasks.forEach(task => {
+            this.completeTask(task);
+        });
+        setTimeout(() => {
+            this.checkAllTasksComplete();
+        }, 500);
     }
     
     updateSageMessage(message) {
@@ -592,3 +632,41 @@ document.addEventListener('DOMContentLoaded', () => {
     
     new LinuxQuestDay2();
 });
+
+// 意図的な退出フラグ
+let isIntentionalExit = false;
+
+// ページ離脱前の確認（意図しない離脱のみ）
+window.addEventListener('beforeunload', (event) => {
+    // 意図的な退出の場合は警告しない
+    if (isIntentionalExit) {
+        return;
+    }
+    
+    // 進行中の場合のみ確認
+    const game = document.querySelector('.container');
+    if (game && !localStorage.getItem('day2-completed')) {
+        event.preventDefault();
+        event.returnValue = '本当にページを離れますか？進捗が失われる可能性があります。';
+        return event.returnValue;
+    }
+});
+
+// 固定ナビゲーションボタンの関数
+function confirmReturnHome() {
+    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
+    if (confirmed) {
+        // 意図的な退出フラグを設定
+        isIntentionalExit = true;
+        
+        // 進捗を保存
+        const currentProgress = {
+            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('day2-progress', JSON.stringify(currentProgress));
+        
+        // メイン画面に戻る
+        window.location.href = '../index.html';
+    }
+}
