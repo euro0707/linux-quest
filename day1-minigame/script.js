@@ -409,22 +409,4 @@ window.addEventListener('beforeunload', (event) => {
     }
 });
 
-// 固定ナビゲーションボタンの関数
-function confirmReturnHome() {
-    const confirmed = confirm('メイン画面に戻りますか？\n\n現在の進捗は保存されます。');
-    if (confirmed) {
-        // 意図的な退出フラグを設定
-        isIntentionalExit = true;
-        
-        // 進捗を保存
-        const currentProgress = {
-            completedTasks: Array.from(document.querySelector('.container')?.game?.completedTasks || []),
-            timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('day1-progress', JSON.stringify(currentProgress));
-        
-        // メイン画面に戻る
-        window.location.href = '../index.html';
-    }
-}
 
